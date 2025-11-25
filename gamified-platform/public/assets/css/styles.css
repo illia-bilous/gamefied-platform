@@ -1,0 +1,324 @@
+:root {
+    /* Палітра з макету */
+    --bg-dark: #2c241b;       /* Темно-коричневий фон (для body/sidebar) */
+    --bg-board: #1f3a33;      /* Темно-зелений фон (для дошки праворуч) */
+    --accent-green: #2ecc71;  /* Яскраво-зелений (кнопки, акценти) */
+    --accent-teal: #1abc9c;   /* Бірюзовий (меню) */
+    --accent-gold: #f1c40f;   /* Золотий (заголовки, іконки) */
+    --card-bg: #eaddcf;       /* Бежевий (картки квестів, лідерборд) */
+    --text-dark: #2c3e50;     /* Темний текст на світлому фоні */
+    --text-light: #ecf0f1;    /* Світлий текст на темному фоні */
+    --danger: #e74c3c;        /* Червоний (вихід) */
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-dark);
+    height: 100vh;
+    overflow: hidden; /* Щоб не було скролу на сторінці логіну */
+}
+
+/* --- Загальні стилі екранів --- */
+.screen {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+.screen.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Специфічно для Dashboard - розтягуємо на весь екран */
+.screen.dashboard.active {
+    flex-direction: row;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 10px;
+    box-sizing: border-box;
+    background-color: var(--bg-dark);
+}
+
+/* --- Контейнери для Auth (Вхід/Реєстрація) --- */
+.main-content.center-content, 
+.auth-form-container {
+    background: var(--card-bg);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+    border: 4px solid #5d4037; /* Ефект дерев'яної рамки */
+}
+
+h1, h2 {
+    color: #4e342e;
+    margin-bottom: 20px;
+}
+
+p {
+    color: #5d4037;
+    margin-bottom: 30px;
+}
+
+/* --- Форми --- */
+input, select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border-radius: 10px;
+    border: 2px solid #a1887f;
+    background-color: #fff8e1; /* Колір паперу */
+    font-size: 16px;
+    box-sizing: border-box;
+    outline: none;
+}
+
+input:focus, select:focus {
+    border-color: var(--accent-teal);
+    box-shadow: 0 0 5px rgba(26, 188, 156, 0.5);
+}
+
+label {
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #4e342e;
+}
+
+/* --- Кнопки (стиль з макету) --- */
+.btn {
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.btn.primary {
+    background-color: var(--accent-teal);
+    color: white;
+    box-shadow: 0 4px 0 #16a085; /* Ефект 3D кнопки */
+}
+
+.btn.primary:hover {
+    background-color: #1dd2af;
+}
+
+.btn.secondary {
+    background-color: #8d6e63;
+    color: white;
+    box-shadow: 0 4px 0 #6d4c41;
+}
+
+.btn.secondary:hover {
+    background-color: #a1887f;
+}
+
+.btn.back-btn {
+    width: auto;
+    background: transparent;
+    color: #5d4037;
+    box-shadow: none;
+    padding: 0;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* --- SIDEBAR (Ліва панель - стиль дерева/шкіри) --- */
+.sidebar {
+    width: 280px;
+    background-color: var(--bg-dark);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    border-right: 2px solid #3e2723;
+    color: var(--text-light);
+    flex-shrink: 0;
+}
+
+.sidebar-header h3 {
+    text-align: center;
+    color: var(--accent-gold);
+    border-bottom: 2px solid #5d4037;
+    padding-bottom: 15px;
+    margin-top: 0;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+}
+
+/* Стиль меню як на макеті "Прайс лист" */
+.menu-item {
+    background-color: var(--accent-teal); /* Бірюзовий колір кнопок */
+    color: white;
+    border: none;
+    padding: 15px;
+    border-radius: 15px; /* Сильне заокруглення */
+    text-align: left; /* Текст зліва (або center, як на макеті) */
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 3px 0 #117a65; /* Тінь знизу для об'єму */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Центруємо текст як на макеті */
+    font-size: 0.95rem;
+}
+
+.menu-item:hover {
+    transform: translateY(-2px);
+    background-color: #1dd2af;
+}
+
+.menu-item.active {
+    background-color: var(--accent-gold);
+    color: #4e342e;
+    box-shadow: 0 3px 0 #d4ac0d;
+}
+
+.menu-item.logout {
+    background-color: var(--danger); /* Червоний для виходу */
+    box-shadow: 0 3px 0 #c0392b;
+    margin-top: auto;
+}
+
+.spacer {
+    flex-grow: 1;
+}
+
+/* --- MAIN PANEL (Права панель - Зелена дошка) --- */
+.main-panel {
+    flex-grow: 1;
+    background-color: var(--bg-board); /* Темно-зелений фон */
+    border-radius: 20px;
+    margin-left: 10px;
+    padding: 30px;
+    border: 4px solid #5d4037; /* Рамка */
+    overflow-y: auto;
+    position: relative;
+    color: white;
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5); /* Внутрішня тінь */
+}
+
+/* Заголовки всередині панелі */
+.main-panel h2 {
+    color: var(--accent-gold);
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.main-panel p {
+    color: #bdc3c7;
+    text-align: center;
+}
+
+/* Вкладки (Views) */
+.panel-view {
+    display: none;
+    height: 100%;
+    animation: fadeIn 0.4s ease;
+}
+
+.panel-view.active {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Центрування контенту */
+}
+
+/* Кнопка "Почати похід" */
+.campaign-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Можна додати фонову картинку карти */
+    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+#btn-start-campaign {
+    background-color: var(--accent-green);
+    font-size: 1.5rem;
+    padding: 20px 40px;
+    border-radius: 50px;
+    box-shadow: 0 6px 0 #219150, 0 10px 20px rgba(0,0,0,0.4);
+    width: auto;
+}
+
+/* Картки для контенту (Лідерборд, Профіль і т.д.) */
+/* Якщо ви додасте списки або таблиці, вони матимуть цей стиль */
+.card-content {
+    background-color: var(--card-bg);
+    color: var(--text-dark);
+    padding: 20px;
+    border-radius: 15px;
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Анімації */
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Допоміжні класи */
+.hidden {
+    display: none !important;
+}
+
+.input-error {
+    border-color: var(--danger) !important;
+    background-color: #fadbd8 !important;
+}
+
+.error-msg {
+    color: var(--danger);
+    font-size: 12px;
+    text-align: left;
+    margin-top: -10px;
+    margin-bottom: 10px;
+}
