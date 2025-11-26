@@ -1,6 +1,7 @@
 import { getCurrentUser } from "./auth.js";
-import { getShopItems, findItemById } from "./shopData.js"; // <--- Імпортуємо базу товарів
+import { getShopItems, findItemById } from "./shopData.js";
 
+// --- ФУНКЦІЯ ЗБЕРЕЖЕННЯ ---
 function saveUserData(user) {
     localStorage.setItem("currentUser", JSON.stringify(user));
     const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
@@ -28,27 +29,103 @@ export function initStudentPanel() {
     // --- Оновлення даних ---
     updateHomeDisplay(user);
 
-    // --- Завантаження магазину з БД ---
-    const shopItems = getShopItems(); // Беремо актуальні дані
+    // --- Завантаження магазину ---
+    const shopItems = getShopItems();
     renderShopSection("rewards-micro-list", shopItems.micro);
     renderShopSection("rewards-medium-list", shopItems.medium);
     renderShopSection("rewards-large-list", shopItems.large);
 
-    // --- Кнопка старту ---
+    // ==========================================
+    // 🎮 ЛОГІКА UNITY (INTEGRATION v2: postMessage)
+    // ==========================================
+
+    const unityContainer = document.getElementById("unity-container");
     const startBtn = document.getElementById("btn-start-lesson");
+
+    // 1. Слухач повідомлень від Unity
+    // Це найбезпечніший метод. Unity пише "SMS", а ми читаємо.
+    window.addEventListener("message", function(event) {
+        // Перевіряємо, чи це текст (щоб не ламалось від системних подій)
+        if (typeof event.data !== "string") return;
+
+        console.log("Отримано сигнал від Unity:", event.data);
+
+        // А) Якщо прийшла команда додати монети (Наприклад: "ADD_COINS|10")
+        if (event.data.startsWith("ADD_COINS|")) {
+            const amount = parseInt(event.data.split("|")[1]); // Витягуємо число
+            
+            console.log(`Нараховуємо: ${amount} монет`);
+            
+            // Оновлюємо дані
+            user = getCurrentUser(); // Беремо найсвіжіші дані
+            user.profile.gold += amount;
+            saveUserData(user);
+            updateHomeDisplay(user);
+
+            // Ефект пульсації для лічильника
+            const goldDisplay = document.getElementById("student-gold-display");
+            if(goldDisplay) {
+                goldDisplay.classList.add("pulse");
+                setTimeout(() => goldDisplay.classList.remove("pulse"), 1000);
+            }
+        }
+
+        // Б) Якщо прийшла команда закрити гру
+        if (event.data === "CLOSE_GAME") {
+            closeUnityGame();
+        }
+    });
+
+    // 2. Функція запуску гри (Кнопка "Почати урок")
     if (startBtn) {
         startBtn.onclick = () => {
-            const unityContainer = document.getElementById("unity-container");
             if (unityContainer) {
                 unityContainer.classList.remove("hidden");
-                if (!unityContainer.querySelector("iframe")) {
-                     unityContainer.innerHTML = `<iframe src="unity/index.html" style="width:100%; height:600px; border:none;"></iframe>`;
+                unityContainer.scrollIntoView({ behavior: 'smooth' });
+
+                // Додаємо кнопку "Примусовий вихід" (на випадок зависання)
+                if (!document.getElementById("btn-force-close-unity")) {
+                    const closeBtn = document.createElement("button");
+                    closeBtn.id = "btn-force-close-unity";
+                    closeBtn.innerText = "✖ Закрити гру";
+                    closeBtn.style.cssText = "margin-bottom: 10px; background: #c0392b; color: white; border: none; padding: 10px; cursor: pointer; border-radius: 5px;";
+                    closeBtn.onclick = closeUnityGame;
+                    unityContainer.insertBefore(closeBtn, unityContainer.firstChild);
+                }
+
+                // Вставляємо iframe з грою
+                // Важливо: шлях unity/index.html має бути правильним
+                const iframe = unityContainer.querySelector("iframe");
+                if (!iframe) {
+                     const newIframe = document.createElement("iframe");
+                     newIframe.src = "unity/index.html"; 
+                     newIframe.style.cssText = "width:100%; height:600px; border:none;";
+                     unityContainer.appendChild(newIframe);
                 }
             }
         };
     }
 
-    // --- Функції ---
+    // 3. Функція закриття гри
+    function closeUnityGame() {
+        console.log("Закриваємо гру...");
+        if (unityContainer) {
+            unityContainer.classList.add("hidden");
+            
+            // Видаляємо iframe (щоб гра повністю вивантажилась з пам'яті)
+            const iframe = unityContainer.querySelector("iframe");
+            if (iframe) iframe.remove();
+            
+            // Видаляємо кнопку закриття
+            const closeBtn = document.getElementById("btn-force-close-unity");
+            if (closeBtn) closeBtn.remove();
+        }
+        // Оновлюємо інтерфейс
+        user = getCurrentUser();
+        updateHomeDisplay(user);
+    };
+
+    // --- Допоміжні функції UI ---
 
     function updateHomeDisplay(currentUser) {
         document.getElementById("student-name-display").textContent = currentUser.name;
@@ -88,8 +165,6 @@ export function initStudentPanel() {
                 <div class="item-desc">${item.desc}</div>
                 <button class="btn-buy" data-id="${item.id}">Купити</button>
             `;
-            
-            // Передаємо item у функцію покупки
             itemDiv.querySelector(".btn-buy").addEventListener("click", () => buyItem(item));
             container.appendChild(itemDiv);
         });
@@ -97,10 +172,6 @@ export function initStudentPanel() {
 
     function buyItem(visualItem) {
         user = getCurrentUser(); 
-
-        // 1. ВАЖЛИВО: Перевіряємо актуальну ціну в базі перед списанням!
-        // visualItem - це те, що ми бачимо на екрані (могло застаріти)
-        // realItem - це те, що зараз в базі
         const realItem = findItemById(visualItem.id);
 
         if (!realItem) {
@@ -108,14 +179,12 @@ export function initStudentPanel() {
             return;
         }
 
-        // Якщо ціна змінилася
         if (realItem.price !== visualItem.price) {
-            alert(`Увага! Вчитель змінив ціну на "${realItem.name}".\nСтара ціна: ${visualItem.price}\nНова ціна: ${realItem.price}\nСторінку буде оновлено.`);
-            location.reload(); // Перезавантажуємо сторінку, щоб показати нові ціни
+            alert(`Увага! Вчитель змінив ціну. Нова ціна: ${realItem.price}`);
+            location.reload(); 
             return;
         }
 
-        // Якщо ціна актуальна - купуємо
         if (user.profile.gold >= realItem.price) {
             user.profile.gold -= realItem.price;
             if (!user.profile.inventory) user.profile.inventory = [];
