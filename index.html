@@ -96,10 +96,21 @@
     </section>
     
     <section id="screen-student" class="screen dashboard">
+        
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h3>Кабінет Учня</h3>
+                <h3>🎓 Кабінет Учня</h3>
             </div>
+
+            <div class="sidebar-profile-info">
+                <div style="font-size: 30px; margin-bottom: 5px;">👤</div>
+                <h4 id="student-name-display" style="margin:0; color:white;">Ім'я</h4>
+                <div id="student-class-display" class="class-badge" style="margin-top:5px;">Клас --</div>
+                <div class="coin-balance-sidebar" style="margin-top: 10px; font-size: 1.2em; color: #ffd700; font-weight: bold;">
+                    💰 <span id="student-gold-display">0</span>
+                </div>
+            </div>
+
             <nav class="sidebar-nav">
                 <button class="menu-item active" data-panel="home">
                     🏠 Головна
@@ -107,17 +118,22 @@
                 <button class="menu-item" data-panel="treasury">
                     💰 Скарбниця
                 </button>
+                
                 <button class="menu-item" data-panel="leaderboard">
                     🏆 Лідерборд
                 </button>
+
                 <button class="menu-item" data-panel="profile">
-                    👤 Профіль / Досягнення
+                    👤 Інвентар
                 </button>
+
+                <div class="spacer"></div> 
+                
                 <button class="menu-item" data-panel="settings">
                     ⚙️ Налаштування
                 </button>
-                
-                <div class="spacer"></div> <button id="logout-student" class="menu-item logout">
+
+                <button id="logout-student" class="menu-item logout">
                     🚪 Вихід
                 </button>
             </nav>
@@ -125,69 +141,57 @@
 
         <main id="student-panel" class="main-panel">
             
-            <div id="view-home" class="panel-view active home-profile-layout">
-                <h1 class="page-title">Кабінет учня</h1>
-                
-                <div class="profile-header">
-                    <div class="profile-info">
-                        <h2 id="student-name-display">Ім'я Учня</h2>
-                        <p id="student-email-display" class="info-text">email</p>
-                        <p class="info-text">Клас: <span id="student-class-display" class="highlight-text">--</span></p>
-                    </div>
-                    
-                    <div class="coin-balance-card">
-                        <span class="coin-icon">💰</span>
-                        <span id="student-gold-display">0</span>
-                    </div>
-                </div>
-
-                <hr class="custom-divider">
-
-                <div class="inventory-section">
-                    <h3>🎒 Ваші придбані нагороди:</h3>
-                    <ul id="student-inventory-list" class="inventory-list">
-                        <li class="empty-msg">Поки що пусто... Завітайте до Скарбниці!</li>
-                    </ul>
-                </div>
-
-                <div class="action-area" style="margin-top: 40px;">
-                    <button id="btn-start-lesson" class="btn-wide-white">
-                        ПОЧАТИ УРОК
+            <div id="view-home" class="panel-view active" style="height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <div class="game-wrapper" style="width: 100%; max-width: 1200px; text-align: center;">
+                    <button id="btn-start-lesson" class="btn-primary" style="padding: 20px 60px; font-size: 1.5em; border-radius: 50px; box-shadow: 0 10px 30px rgba(108, 92, 231, 0.5); transition: transform 0.2s;">
+                        ▶ ПОЧАТИ УРОК
                     </button>
+                    <div id="unity-container" class="hidden" style="width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 15px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5); margin-top: 20px;">
+                        </div>
                 </div>
-
-                <div id="unity-container" class="hidden"></div>
             </div>
 
             <div id="view-treasury" class="panel-view hidden">
                 <h2 style="text-align:center; margin-bottom:20px;">💰 Скарбниця Гільдії</h2>
                 <div class="treasury-grid">
-                    
                     <div class="reward-column">
                         <div class="reward-header">Мікро-нагороди</div>
                         <div class="dashed-line"></div>
-                        <div id="rewards-micro-list">
-                            </div>
+                        <div id="rewards-micro-list"></div>
                     </div>
-
                     <div class="reward-column">
                         <div class="reward-header">Середні нагороди</div>
                         <div class="dashed-line"></div>
                         <div id="rewards-medium-list"></div>
                     </div>
-
                     <div class="reward-column">
                         <div class="reward-header">Великі нагороди</div>
                         <div class="dashed-line"></div>
                         <div id="rewards-large-list"></div>
                     </div>
-
                 </div>
             </div>
 
-            <div id="view-leaderboard" class="panel-view hidden"><h2>🏆 Рейтинг</h2></div>
-            <div id="view-profile" class="panel-view hidden"><h2>👤 Профіль</h2></div>
-            <div id="view-settings" class="panel-view hidden"><h2>⚙️ Налаштування</h2></div>
+            <div id="view-leaderboard" class="panel-view hidden">
+                <div style="text-align: center; margin-top: 50px;">
+                    <h2>🏆 Таблиця лідерів</h2>
+                    <p>Тут скоро з'явиться рейтинг найкращих учнів!</p>
+                    <div style="font-size: 50px;">🥇🥈🥉</div>
+                </div>
+            </div>
+
+            <div id="view-profile" class="panel-view hidden">
+                <h2>🎒 Мій Інвентар</h2>
+                <ul id="student-inventory-list" class="inventory-list"></ul>
+            </div>
+
+            <div id="view-settings" class="panel-view hidden">
+                <div style="text-align: center; margin-top: 50px;">
+                    <h2>⚙️ Налаштування</h2>
+                    <p>Функція зміни пароля та аватарки в розробці.</p>
+                </div>
+            </div>
+
         </main>
     </section>
 

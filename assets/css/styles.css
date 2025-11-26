@@ -1,14 +1,16 @@
+/* =========================================
+   1. ЗМІННІ ТА БАЗОВІ НАЛАШТУВАННЯ
+   ========================================= */
 :root {
-    /* Палітра з макету */
-    --bg-dark: #2c241b;       /* Темно-коричневий фон (для body/sidebar) */
-    --bg-board: #1f3a33;      /* Темно-зелений фон (для дошки праворуч) */
-    --accent-green: #2ecc71;  /* Яскраво-зелений (кнопки, акценти) */
-    --accent-teal: #1abc9c;   /* Бірюзовий (меню) */
-    --accent-gold: #f1c40f;   /* Золотий (заголовки, іконки) */
-    --card-bg: #eaddcf;       /* Бежевий (картки квестів, лідерборд) */
-    --text-dark: #2c3e50;     /* Темний текст на світлому фоні */
-    --text-light: #ecf0f1;    /* Світлий текст на темному фоні */
-    --danger: #e74c3c;        /* Червоний (вихід) */
+    --bg-dark: #2c241b;       /* Темно-коричневий (фон) */
+    --bg-board: #1f3a33;      /* Темно-зелений (дошка) */
+    --accent-green: #2ecc71;  /* Яскраво-зелений */
+    --accent-teal: #1abc9c;   /* Бірюзовий (кнопки меню) */
+    --accent-gold: #f1c40f;   /* Золотий (акценти) */
+    --card-bg: #eaddcf;       /* Бежевий (форми) */
+    --text-dark: #2c3e50;     
+    --text-light: #ecf0f1;    
+    --danger: #e74c3c;        /* Червоний */
 }
 
 body {
@@ -17,10 +19,16 @@ body {
     background-color: var(--bg-dark);
     color: var(--text-dark);
     height: 100vh;
-    overflow: hidden; /* Щоб не було скролу на сторінці логіну */
+    overflow: hidden;
 }
 
-/* --- Загальні стилі екранів --- */
+/* --- Утиліти --- */
+.hidden { display: none !important; }
+.spacer { flex-grow: 1; }
+
+/* =========================================
+   2. ЕКРАНИ ТА ЛЕЯУТ
+   ========================================= */
 .screen {
     display: none;
     width: 100%;
@@ -34,19 +42,21 @@ body {
     justify-content: center;
 }
 
-/* Специфічно для Dashboard - розтягуємо на весь екран */
+/* Головний контейнер кабінету (Сайдбар + Контент) */
 .screen.dashboard.active {
-    flex-direction: row;
+    display: flex;
+    flex-direction: row;        /* Розміщуємо зліва направо */
     align-items: stretch;
     justify-content: flex-start;
-    padding: 10px;
-    box-sizing: border-box;
+    padding: 0;                 /* Прибираємо відступи у контейнера */
     background-color: var(--bg-dark);
 }
 
-/* --- Контейнери для Auth (Вхід/Реєстрація) --- */
-.main-content.center-content, 
-.auth-form-container {
+/* =========================================
+   3. ФОРМИ ВХОДУ ТА РЕЄСТРАЦІЇ
+   ========================================= */
+.auth-form-container,
+.main-content.center-content {
     background: var(--card-bg);
     padding: 40px;
     border-radius: 20px;
@@ -54,27 +64,19 @@ body {
     max-width: 400px;
     width: 100%;
     text-align: center;
-    border: 4px solid #5d4037; /* Ефект дерев'яної рамки */
+    border: 4px solid #5d4037;
 }
 
-h1, h2 {
-    color: #4e342e;
-    margin-bottom: 20px;
-}
+h1, h2, h3 { color: #4e342e; margin-bottom: 20px; }
+p { color: #5d4037; margin-bottom: 30px; }
 
-p {
-    color: #5d4037;
-    margin-bottom: 30px;
-}
-
-/* --- Форми --- */
 input, select {
     width: 100%;
     padding: 12px;
     margin-bottom: 15px;
     border-radius: 10px;
     border: 2px solid #a1887f;
-    background-color: #fff8e1; /* Колір паперу */
+    background-color: #fff8e1;
     font-size: 16px;
     box-sizing: border-box;
     outline: none;
@@ -93,7 +95,9 @@ label {
     color: #4e342e;
 }
 
-/* --- Кнопки (стиль з макету) --- */
+/* =========================================
+   4. КНОПКИ
+   ========================================= */
 .btn {
     width: 100%;
     padding: 14px;
@@ -102,35 +106,26 @@ label {
     font-size: 16px;
     font-weight: bold;
     cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    transition: transform 0.1s ease;
     margin-bottom: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.btn:active {
-    transform: scale(0.98);
-}
+.btn:active { transform: scale(0.98); }
 
 .btn.primary {
     background-color: var(--accent-teal);
     color: white;
-    box-shadow: 0 4px 0 #16a085; /* Ефект 3D кнопки */
+    box-shadow: 0 4px 0 #16a085;
 }
-
-.btn.primary:hover {
-    background-color: #1dd2af;
-}
+.btn.primary:hover { background-color: #1dd2af; }
 
 .btn.secondary {
     background-color: #8d6e63;
     color: white;
     box-shadow: 0 4px 0 #6d4c41;
 }
-
-.btn.secondary:hover {
-    background-color: #a1887f;
-}
+.btn.secondary:hover { background-color: #a1887f; }
 
 .btn.back-btn {
     width: auto;
@@ -138,26 +133,23 @@ label {
     color: #5d4037;
     box-shadow: none;
     padding: 0;
-    margin-bottom: 20px;
     text-align: left;
 }
 
-.button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* --- SIDEBAR (Ліва панель - стиль дерева/шкіри) --- */
+/* =========================================
+   5. САЙДБАР (ЛІВА ПАНЕЛЬ)
+   ========================================= */
 .sidebar {
     width: 280px;
-    background-color: var(--bg-dark);
+    background-color: var(--bg-dark); /* Темний фон */
     padding: 20px;
     display: flex;
     flex-direction: column;
     border-right: 2px solid #3e2723;
     color: var(--text-light);
     flex-shrink: 0;
+    z-index: 10;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.5);
 }
 
 .sidebar-header h3 {
@@ -168,6 +160,32 @@ label {
     margin-top: 0;
 }
 
+/* Інфо про учня в сайдбарі */
+.sidebar-profile-info {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.class-badge {
+    display: inline-block;
+    background: #6c5ce7;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 0.85em;
+}
+
+.coin-balance-sidebar {
+    font-size: 1.4em;
+    color: #ffd700;
+    font-weight: bold;
+}
+
+/* Меню навігації */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
@@ -175,21 +193,19 @@ label {
     overflow-y: auto;
 }
 
-/* Стиль меню як на макеті "Прайс лист" */
 .menu-item {
-    background-color: var(--accent-teal); /* Бірюзовий колір кнопок */
+    background-color: var(--accent-teal);
     color: white;
     border: none;
     padding: 15px;
-    border-radius: 15px; /* Сильне заокруглення */
-    text-align: left; /* Текст зліва (або center, як на макеті) */
+    border-radius: 15px;
     font-weight: bold;
     cursor: pointer;
     transition: all 0.2s;
-    box-shadow: 0 3px 0 #117a65; /* Тінь знизу для об'єму */
+    box-shadow: 0 3px 0 #117a65;
     display: flex;
     align-items: center;
-    justify-content: center; /* Центруємо текст як на макеті */
+    justify-content: center;
     font-size: 0.95rem;
 }
 
@@ -205,44 +221,26 @@ label {
 }
 
 .menu-item.logout {
-    background-color: var(--danger); /* Червоний для виходу */
+    background-color: var(--danger);
     box-shadow: 0 3px 0 #c0392b;
     margin-top: auto;
 }
 
-.spacer {
-    flex-grow: 1;
-}
-
-/* --- MAIN PANEL (Права панель - Зелена дошка) --- */
+/* =========================================
+   6. ГОЛОВНА ПАНЕЛЬ (ПРАВА ЧАСТИНА)
+   ========================================= */
 .main-panel {
     flex-grow: 1;
-    background-color: var(--bg-board); /* Темно-зелений фон */
-    border-radius: 20px;
-    margin-left: 10px;
+    background-color: var(--bg-board); /* Темно-зелена дошка */
+    border-radius: 20px; /* Заокруглення зліва */
+    margin: 10px 10px 10px 0;
     padding: 30px;
-    border: 4px solid #5d4037; /* Рамка */
+    border: 4px solid #5d4037;
     overflow-y: auto;
-    position: relative;
     color: white;
-    box-shadow: inset 0 0 50px rgba(0,0,0,0.5); /* Внутрішня тінь */
+    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
 }
 
-/* Заголовки всередині панелі */
-.main-panel h2 {
-    color: var(--accent-gold);
-    text-shadow: 1px 1px 0 #000;
-    text-align: center;
-    font-size: 2rem;
-    margin-bottom: 10px;
-}
-
-.main-panel p {
-    color: #bdc3c7;
-    text-align: center;
-}
-
-/* Вкладки (Views) */
 .panel-view {
     display: none;
     height: 100%;
@@ -252,264 +250,73 @@ label {
 .panel-view.active {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Центрування контенту */
-}
-
-/* Кнопка "Почати похід" */
-.campaign-container {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
     align-items: center;
-    /* Можна додати фонову картинку карти */
-    background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
 }
 
-#btn-start-campaign {
-    background-color: var(--accent-green);
-    font-size: 1.5rem;
-    padding: 20px 40px;
-    border-radius: 50px;
-    box-shadow: 0 6px 0 #219150, 0 10px 20px rgba(0,0,0,0.4);
-    width: auto;
-}
-
-/* Картки для контенту (Лідерборд, Профіль і т.д.) */
-/* Якщо ви додасте списки або таблиці, вони матимуть цей стиль */
-.card-content {
-    background-color: var(--card-bg);
-    color: var(--text-dark);
-    padding: 20px;
-    border-radius: 15px;
-    width: 100%;
-    max-width: 600px;
-    margin-top: 20px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-/* Анімації */
-.pulse {
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Допоміжні класи */
-.hidden {
-    display: none !important;
-}
-
-.input-error {
-    border-color: var(--danger) !important;
-    background-color: #fadbd8 !important;
-}
-
-.error-msg {
-    color: var(--danger);
-    font-size: 12px;
-    text-align: left;
-    margin-top: -10px;
-    margin-bottom: 10px;
-}
-/* --- Стилі для Головної сторінки (Home Profile) --- */
-
-.home-profile-layout {
-    text-align: center;
-    max-width: 800px;
-    margin: 0 auto;
-    padding-top: 20px;
-}
-
-.page-title {
+/* Заголовки на правій панелі */
+.main-panel h2 {
     color: var(--accent-gold);
-    font-size: 2.5rem;
-    margin-bottom: 30px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.profile-info h2 {
-    color: #6fffd9; /* Світло-бірюзовий для імені */
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
     font-size: 2rem;
-    margin-bottom: 10px;
 }
 
-.info-text {
-    color: #bdc3c7;
-    font-size: 1.1rem;
-    margin: 5px 0;
-}
-
-.highlight-text {
-    color: white;
-    font-weight: bold;
-}
-
-/* Розділювач (лінія) */
-.custom-divider {
-    border: 0;
-    height: 2px;
-    background-image: linear-gradient(to right, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
-    margin: 40px 0;
-}
-
-.progress-section {
-    margin-bottom: 50px;
-}
-
-.progress-section h3 {
-    color: white;
-    font-size: 1.5rem;
-    margin-bottom: 15px;
-}
-
-.faded-text {
-    color: rgba(255,255,255,0.4);
-    font-style: italic;
-}
-
-/* Велика біла кнопка "ПОЧАТИ УРОК" */
-.action-area {
-    margin-top: 40px;
-    display: flex;
-    justify-content: center;
+/* =========================================
+   7. ГРА (UNITY CONTAINER)
+   ========================================= */
+.game-wrapper {
     width: 100%;
-}
-
-.btn-wide-white {
-    max-width: 300px; /* Щоб кнопка не була гігантською */
-    width: 100%;
-    background-color: #ecf0f1; /* Майже білий */
-    color: #2c3e50; /* Темний текст */
-    font-size: 1.2rem;
-    font-weight: 900;
-    padding: 20px;
-    border: none;
-    border-radius: 15px;
-    cursor: pointer;
-    text-transform: uppercase;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transition: transform 0.2s, background-color 0.2s;
-}
-
-.btn-wide-white:hover {
-    background-color: white;
-    transform: scale(1.02);
-}
-
-.btn-wide-white:active {
-    transform: scale(0.98);
-}
-
-/* --- Стилі для Балансу та Інвентарю на Головній --- */
-.profile-header {
-    position: relative;
+    max-width: 1200px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    margin-bottom: 40px;
-    padding-top: 10px; 
-    width: 100%; /* Розтягуємо на всю ширину, щоб монети стали в кут */
 }
 
-.profile-info {
-    text-align: center;
-    margin-top: 10px; /* Відступ зверху, щоб ім'я не лізло на рамку */
-}
-
-.coin-balance-card {
-    position: absolute;
-    top: 0;       /* Притискаємо до верху */
-    right: 20px;  /* Відступаємо 20px від правого краю (щоб не липло) */
-    
-    background: #2c3e50;
-    padding: 15px 16px;
-    border-radius: 12px;
-    border: 2px solid var(--accent-gold);
-    color: var(--accent-gold);
-    font-size: 1.2rem;
+.btn-primary.large { /* Кнопка старту */
+    padding: 20px 60px;
+    font-size: 1.5em;
+    border-radius: 50px;
+    box-shadow: 0 10px 30px rgba(108, 92, 231, 0.5);
+    transition: transform 0.2s;
+    background-color: var(--accent-green);
+    color: white;
+    border: none;
+    cursor: pointer;
     font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-    z-index: 10;
 }
 
-/* На мобільних телефонах монети опускаємо під ім'я */
-@media (max-width: 768px) {
-    .coin-balance-card {
-        position: relative; 
-        right: auto;
-        top: auto;
-        margin-bottom: 15px;
-    }
-}
+.btn-primary.large:hover { transform: scale(1.05); }
 
-.inventory-section {
-    text-align: center; /* Текст по центру */
-    background: rgba(0, 0, 0, 0.25); /* Трохи темніший фон */
-    padding: 25px;
+#unity-container {
+    width: 100%;
+    aspect-ratio: 16 / 9; /* Автоматична пропорція */
+    background: black;
     border-radius: 15px;
-    
-    /* Центрування самого блоку */
-    margin: 20px auto; 
-    max-width: 500px; /* Обмежимо ширину, щоб не було занадто широко */
-    width: 90%;
-    
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    margin-top: 20px;
 }
 
-.inventory-list {
-    list-style: none;
-    padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center; /* Елементи інвентарю теж по центру */
-    gap: 10px;
-    margin-top: 15px;
+#unity-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
 }
 
-.inventory-item {
-    background: #eaddcf;
-    color: #2c241b;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-weight: bold;
-    border: 2px solid #8d6e63;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-
-.empty-msg {
-    color: rgba(255,255,255,0.5);
-    font-style: italic;
-}
-
-/* --- Стилі Скарбниці (Treasury) --- */
+/* =========================================
+   8. МАГАЗИН (СКАРБНИЦЯ)
+   ========================================= */
 .treasury-grid {
     display: flex;
     gap: 20px;
     justify-content: center;
     align-items: flex-start;
     flex-wrap: wrap;
+    width: 100%;
 }
 
 .reward-column {
-    background-color: #111; /* Чорний фон як на макеті */
+    background-color: #111;
     border-radius: 20px;
     padding: 20px;
     width: 280px;
@@ -534,42 +341,12 @@ label {
     width: 100%;
 }
 
-/* Картка окремого товару */
-.shop-item {
-    margin-bottom: 25px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.shop-item-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.item-name {
-    font-size: 1rem;
-    font-weight: bold;
-    color: white;
-    text-align: left;
-    width: 60%;
-}
-
-.item-price {
-    color: var(--accent-gold);
-    font-weight: bold;
-    text-align: right;
-    width: 35%;
-}
-
-.item-desc {
-    font-size: 0.8rem;
-    color: #aaa;
-    text-align: left;
-    margin-bottom: 8px;
-    line-height: 1.2;
-}
+/* Товар в магазині */
+.shop-item { margin-bottom: 25px; display: flex; flex-direction: column; gap: 5px; }
+.shop-item-row { display: flex; justify-content: space-between; align-items: flex-start; }
+.item-name { font-size: 1rem; font-weight: bold; color: white; width: 60%; }
+.item-price { color: var(--accent-gold); font-weight: bold; text-align: right; width: 35%; }
+.item-desc { font-size: 0.8rem; color: #aaa; margin-bottom: 8px; }
 
 .btn-buy {
     background-color: transparent;
@@ -583,12 +360,44 @@ label {
     width: 100%;
     text-transform: uppercase;
 }
+.btn-buy:hover { background-color: var(--accent-gold); color: black; }
 
-.btn-buy:hover {
-    background-color: var(--accent-gold);
-    color: black;
+/* =========================================
+   9. ІНВЕНТАР
+   ========================================= */
+.inventory-list {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
 }
 
-.btn-buy:active {
-    transform: scale(0.95);
+.inventory-item {
+    background: #eaddcf;
+    color: #2c241b;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    border: 2px solid #8d6e63;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* =========================================
+   10. АНІМАЦІЇ
+   ========================================= */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.pulse { animation: pulse 1s infinite; }
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
 }
