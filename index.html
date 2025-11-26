@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamified Learning Platform</title>
+    <link rel="stylesheet" href="assets/css/styles.css"> 
+    </head>
+<body>
+
+    <section id="screen-home" class="screen active">
+        <div class="main-content center-content">
+            <h1>Ласкаво просимо до Гейміфікованої Платформи!</h1>
+            <p>Оберіть свою роль для входу або реєстрації.</p>
+            <div class="button-group">
+                <button id="btn-role-student" class="btn large primary">Я — Учень</button>
+                <button id="btn-role-teacher" class="btn large secondary">Я — Вчитель</button>
+            </div>
+
+            <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 10px;">
+                <button id="btn-debug-clear-users" class="btn" style="background-color: #d9534f; color: white; font-size: 0.8rem;">
+                    [TEST] Очистити всіх користувачів
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="screen-auth-choice" class="screen">
+        <div class="main-content center-content">
+            <button id="btn-back-to-home" class="btn back-btn">← Назад</button>
+            <h2>Вхід або Реєстрація</h2>
+            <div class="button-group">
+                <button id="btn-login" class="btn large primary">Вхід</button>
+                <button id="btn-register" class="btn large secondary">Реєстрація</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="screen-login" class="screen">
+        <div class="main-content auth-form-container">
+            <button id="btn-back-auth1" class="btn back-btn">← Назад</button>
+            <h2>Вхід</h2>
+            <form id="login-form">
+                <label for="login-email">Email:</label>
+                <input type="email" id="login-email" required>
+
+                <label for="login-pass">Пароль:</label>
+                <input type="password" id="login-pass" required>
+
+                <button type="button" id="login-submit" class="btn primary">Увійти</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="screen-register" class="screen">
+        <div class="main-content auth-form-container">
+            <button id="btn-back-auth2" class="btn back-btn">← Назад</button>
+            <h2>Реєстрація</h2>
+
+            <div id="register-form-content">
+                <form id="register-form">
+                    <label for="reg-name">Ім'я та Прізвище:</label>
+                    <input type="text" id="reg-name" required>
+
+                    <label for="reg-email">Email:</label>
+                    <input type="email" id="reg-email" required>
+
+                    <label for="reg-pass">Пароль (мін. 6 символів):</label>
+                    <input type="password" id="reg-pass" required>
+
+                    <div id="select-class-wrapper">
+                        <label for="reg-class">Оберіть ваш клас:</label>
+                        <select id="reg-class" required>
+                            <option value="">-- Оберіть --</option>
+                            <option value="8А">8-А</option>
+                            <option value="8Б">8-Б</option>
+                            <option value="8В">8-В</option>
+                        </select>
+                    </div>
+
+                    <div id="register-teacher-key" class="hidden">
+                        <label for="teacher-key">Код доступу викладача:</label>
+                        <input type="password" id="teacher-key">
+                    </div>
+
+                    <button type="button" id="register-submit" class="btn primary">Зареєструватися</button>
+                </form>
+            </div>
+
+            <div id="register-success" class="card success hidden">
+                <h3>Успішна реєстрація!</h3>
+                <p>Ваш обліковий запис створено. Тепер ви можете увійти.</p>
+                <button id="btn-go-to-login" class="btn secondary">Перейти до входу</button>
+            </div>
+        </div>
+    </section>
+    
+    <section id="screen-student" class="screen dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Кабінет Учня</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="menu-item active" data-panel="home">
+                    🏠 Головна
+                </button>
+                <button class="menu-item" data-panel="treasury">
+                    💰 Скарбниця
+                </button>
+                <button class="menu-item" data-panel="leaderboard">
+                    🏆 Лідерборд
+                </button>
+                <button class="menu-item" data-panel="profile">
+                    👤 Профіль / Досягнення
+                </button>
+                <button class="menu-item" data-panel="settings">
+                    ⚙️ Налаштування
+                </button>
+                
+                <div class="spacer"></div> <button id="logout-student" class="menu-item logout">
+                    🚪 Вихід
+                </button>
+            </nav>
+        </aside>
+
+        <main id="student-panel" class="main-panel">
+            
+            <div id="view-home" class="panel-view active home-profile-layout">
+                <h1 class="page-title">Кабінет учня</h1>
+                
+                <div class="profile-header">
+                    <div class="profile-info">
+                        <h2 id="student-name-display">Ім'я Учня</h2>
+                        <p id="student-email-display" class="info-text">email</p>
+                        <p class="info-text">Клас: <span id="student-class-display" class="highlight-text">--</span></p>
+                    </div>
+                    
+                    <div class="coin-balance-card">
+                        <span class="coin-icon">💰</span>
+                        <span id="student-gold-display">0</span>
+                    </div>
+                </div>
+
+                <hr class="custom-divider">
+
+                <div class="inventory-section">
+                    <h3>🎒 Ваші придбані нагороди:</h3>
+                    <ul id="student-inventory-list" class="inventory-list">
+                        <li class="empty-msg">Поки що пусто... Завітайте до Скарбниці!</li>
+                    </ul>
+                </div>
+
+                <div class="action-area" style="margin-top: 40px;">
+                    <button id="btn-start-lesson" class="btn-wide-white">
+                        ПОЧАТИ УРОК
+                    </button>
+                </div>
+
+                <div id="unity-container" class="hidden"></div>
+            </div>
+
+            <div id="view-treasury" class="panel-view hidden">
+                <h2 style="text-align:center; margin-bottom:20px;">💰 Скарбниця Гільдії</h2>
+                <div class="treasury-grid">
+                    
+                    <div class="reward-column">
+                        <div class="reward-header">Мікро-нагороди</div>
+                        <div class="dashed-line"></div>
+                        <div id="rewards-micro-list">
+                            </div>
+                    </div>
+
+                    <div class="reward-column">
+                        <div class="reward-header">Середні нагороди</div>
+                        <div class="dashed-line"></div>
+                        <div id="rewards-medium-list"></div>
+                    </div>
+
+                    <div class="reward-column">
+                        <div class="reward-header">Великі нагороди</div>
+                        <div class="dashed-line"></div>
+                        <div id="rewards-large-list"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="view-leaderboard" class="panel-view hidden"><h2>🏆 Рейтинг</h2></div>
+            <div id="view-profile" class="panel-view hidden"><h2>👤 Профіль</h2></div>
+            <div id="view-settings" class="panel-view hidden"><h2>⚙️ Налаштування</h2></div>
+        </main>
+    </section>
+
+    <section id="screen-teacher" class="screen dashboard">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h3>Вчительська</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="menu-item active" data-panel="classes">
+                    👥 Класи / Учні
+                </button>
+                <button class="menu-item" data-panel="tasks">
+                    📝 Редактор Завдань
+                </button>
+                <button class="menu-item" data-panel="treasury-editor">
+                    💎 Редактор Скарбниці
+                </button>
+                <button class="menu-item" data-panel="analytics">
+                    📊 Аналітика
+                </button>
+                
+                <div class="spacer"></div> <button id="logout-teacher" class="menu-item logout">
+                    🚪 Вихід
+                </button>
+            </nav>
+        </aside>
+
+        <main id="teacher-panel" class="main-panel">
+             <div id="view-classes" class="panel-view active">
+                 <h2>Управління класами та учнями</h2>
+                 <p>Список зареєстрованих учнів.</p>
+             </div>
+             
+             <div id="view-tasks" class="panel-view hidden">
+                 <h2>Редактор Завдань (Замків)</h2>
+                 <p>Створення нових тестів та завдань.</p>
+             </div>
+
+             <div id="view-treasury-editor" class="panel-view hidden">
+                 <h2 style="text-align:center; margin-bottom:20px; color: var(--accent-gold);">💎 Редагування цін Скарбниці</h2>
+                 <p style="text-align:center; margin-bottom:30px;">Тут ви можете змінювати ціни на нагороди для учнів.</p>
+                 
+                 <div class="treasury-grid">
+                    
+                    <div class="reward-column">
+                        <div class="reward-header">Мікро-нагороди</div>
+                        <div class="dashed-line"></div>
+                        <div id="teacher-rewards-micro"></div> 
+                    </div>
+
+                    <div class="reward-column">
+                        <div class="reward-header">Середні нагороди</div>
+                        <div class="dashed-line"></div>
+                        <div id="teacher-rewards-medium"></div>
+                    </div>
+
+                    <div class="reward-column">
+                        <div class="reward-header">Великі нагороди</div>
+                        <div class="dashed-line"></div>
+                        <div id="teacher-rewards-large"></div>
+                    </div>
+
+                </div>
+             </div>
+
+             <div id="view-analytics" class="panel-view hidden">
+                 <h2>Аналітика прогресу</h2>
+                 <p>Статистика успішності.</p>
+             </div>
+        </main>
+    </section>
+
+    <script type="module" src="src/router.js"></script>
+</body>
+</html>
