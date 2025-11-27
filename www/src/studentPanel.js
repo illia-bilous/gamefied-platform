@@ -1,46 +1,41 @@
 import { getCurrentUser } from "./auth.js";
 import { getShopItems, findItemById } from "./shopData.js";
+// 👇 Додаємо updateDoc та doc
+import { db } from "./firebase.js"; 
+import { collection, query, where, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-// --- ФУНКЦІЯ ЗБЕРЕЖЕННЯ ---
-function saveUserData(user) {
+// 👇 ОНОВЛЕНА ФУНКЦІЯ ЗБЕРЕЖЕННЯ (Зберігає і локально, і в хмару)
+async function saveUserData(user) {
+    // 1. Зберігаємо локально (для швидкості)
     localStorage.setItem("currentUser", JSON.stringify(user));
-    const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
-    const index = allUsers.findIndex(u => u.email === user.email);
-    if (index !== -1) {
-        allUsers[index] = user;
-        localStorage.setItem("users", JSON.stringify(allUsers));
+
+    // 2. Зберігаємо в Firebase (для надійності та лідерборду)
+    if (user.uid) {
+        try {
+            const userRef = doc(db, "users", user.uid);
+            await updateDoc(userRef, {
+                profile: user.profile
+            });
+            console.log("💾 Дані збережено в хмару!");
+        } catch (e) {
+            console.error("Помилка збереження в хмару:", e);
+        }
     }
 }
 
-// Допоміжна функція для отримання всіх користувачів (для лідерборду)
-function getAllUsersFromDB() {
-    return JSON.parse(localStorage.getItem("users") || "[]");
-}
-
-// 👇 Змінна для захисту від дублювання слухача Unity
 let isListenerAdded = false;
 
 export function initStudentPanel() {
-    console.log("StudentPanel: Init (Full Version + x1 Badge)...");
+    console.log("StudentPanel: Init (Cloud Save)...");
     
     let user = getCurrentUser();
     if (!user) return;
 
-    // --- Логіка бонусу ---
-    if (!user.profile.welcomeBonusReceived) {
-        user.profile.gold = 2500;
-        user.profile.welcomeBonusReceived = true;
-        if (!user.profile.inventory) user.profile.inventory = [];
-        saveUserData(user);
-    }
+    // (Стару логіку бонусу прибираємо, бо вона тепер в auth.js)
 
-    // --- Оновлення даних ---
     updateHomeDisplay(user);
-    
-    // 👇 ЗАПУСКАЄМО ГЕНЕРАЦІЮ ЛІДЕРБОРДУ
     renderLeaderboard(user);
 
-    // --- Завантаження магазину ---
     const shopItems = getShopItems();
     renderShopSection("rewards-micro-list", shopItems.micro);
     renderShopSection("rewards-medium-list", shopItems.medium);
@@ -59,13 +54,13 @@ export function initStudentPanel() {
             
             if (event.data.startsWith("ADD_COINS|")) {
                 const amount = parseInt(event.data.split("|")[1]);
-                console.log(`Нараховуємо: ${amount} монет`);
                 let currentUser = getCurrentUser(); 
                 if (currentUser) {
                     currentUser.profile.gold += amount;
-                    saveUserData(currentUser);
+                    saveUserData(currentUser); // Тепер зберігає в базу!
                     updateHomeDisplay(currentUser);
-                    renderLeaderboard(currentUser); // Оновлюємо рейтинг
+                    // Оновлюємо лідерборд, щоб побачити свій прогрес
+                    setTimeout(() => renderLeaderboard(currentUser), 1000);
                 }
             }
 
@@ -74,7 +69,6 @@ export function initStudentPanel() {
             }
         });
         isListenerAdded = true;
-        console.log("System: Unity Listener Activated (ONCE)");
     }
 
     if (startBtn) {
@@ -113,9 +107,7 @@ export function initStudentPanel() {
         }
         const closeBtn = document.getElementById("btn-force-close-unity");
         if (closeBtn) closeBtn.remove();
-        
         if(startBtn) startBtn.style.display = "inline-block"; 
-        
         user = getCurrentUser();
         updateHomeDisplay(user);
         renderLeaderboard(user);
@@ -124,7 +116,7 @@ export function initStudentPanel() {
     // ==========================================
     // 🏆 ЛОГІКА ЛІДЕРБОРДУ
     // ==========================================
-    function renderLeaderboard(currentUser) {
+    async function renderLeaderboard(currentUser) {
         const container = document.getElementById("view-leaderboard");
         if (!container) return;
 
@@ -139,49 +131,65 @@ export function initStudentPanel() {
                             <th style="width: 30%;">Золото</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboard-body"></tbody>
+                    <tbody id="leaderboard-body">
+                        <tr><td colspan="3" style="text-align:center; padding:20px;">Завантаження... ⏳</td></tr>
+                    </tbody>
                 </table>
             </div>
         `;
 
         const tbody = document.getElementById("leaderboard-body");
-        const allUsers = getAllUsersFromDB();
 
-        const classmates = allUsers.filter(u => 
-            u.role === "student" && 
-            u.className === currentUser.className
-        );
+        try {
+            const q = query(
+                collection(db, "users"),
+                where("role", "==", "student"),
+                where("className", "==", currentUser.className)
+            );
 
-        classmates.sort((a, b) => (b.profile.gold || 0) - (a.profile.gold || 0));
+            const querySnapshot = await getDocs(q);
+            const classmates = [];
+            querySnapshot.forEach((doc) => {
+                classmates.push(doc.data());
+            });
 
-        if (classmates.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px;">Клас пустий...</td></tr>`;
-            return;
-        }
+            classmates.sort((a, b) => (b.profile.gold || 0) - (a.profile.gold || 0));
 
-        classmates.forEach((student, index) => {
-            const tr = document.createElement("tr");
-            
-            if (student.email === currentUser.email) {
-                tr.className = "my-rank";
+            if (classmates.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px;">Клас пустий...</td></tr>`;
+                return;
             }
 
-            let rankDisplay = index + 1;
-            if (index === 0) rankDisplay = "🥇 1";
-            if (index === 1) rankDisplay = "🥈 2";
-            if (index === 2) rankDisplay = "🥉 3";
+            tbody.innerHTML = "";
 
-            tr.innerHTML = `
-                <td class="rank-col">${rankDisplay}</td>
-                <td class="name-col">${student.name}</td>
-                <td class="gold-col">${student.profile.gold || 0} 💰</td>
-            `;
-            tbody.appendChild(tr);
-        });
+            classmates.forEach((student, index) => {
+                const tr = document.createElement("tr");
+                
+                if (student.email === currentUser.email) {
+                    tr.className = "my-rank";
+                }
+
+                let rankDisplay = index + 1;
+                if (index === 0) rankDisplay = "🥇 1";
+                if (index === 1) rankDisplay = "🥈 2";
+                if (index === 2) rankDisplay = "🥉 3";
+
+                tr.innerHTML = `
+                    <td class="rank-col">${rankDisplay}</td>
+                    <td class="name-col">${student.name}</td>
+                    <td class="gold-col">${student.profile.gold || 0} 💰</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+        } catch (error) {
+            console.error("Помилка лідерборду:", error);
+            tbody.innerHTML = `<tr><td colspan="3" style="color:red; text-align:center;">Помилка завантаження</td></tr>`;
+        }
     }
 
     // ==========================================
-    // 🎒 ЛОГІКА ІНВЕНТАРЯ (3 КОЛОНКИ + x1)
+    // 🎒 ІНВЕНТАР
     // ==========================================
 
     function updateHomeDisplay(currentUser) {
@@ -203,7 +211,6 @@ export function initStudentPanel() {
             listEl.innerHTML = "";
             const userInv = currentUser.profile.inventory || [];
 
-            // Якщо пусто
             if (userInv.length === 0) {
                 listEl.innerHTML = '<li class="empty-msg" style="width:100%; text-align:center;">Поки що пусто...</li>';
                 listEl.style.display = "block"; 
@@ -229,8 +236,6 @@ export function initStudentPanel() {
                 } else {
                     itemsInCat.forEach(shopItem => {
                         const count = userInv.filter(uItem => uItem.name === shopItem.name).length;
-                        
-                        // 👇 ТУТ ЗМІНА: Завжди показуємо x1, x2...
                         const badge = `<span class="item-count">x${count}</span>`;
                         
                         contentHtml += `
@@ -303,9 +308,9 @@ export function initStudentPanel() {
                 date: new Date().toISOString() 
             });
             
-            saveUserData(user);
+            saveUserData(user); // 🔥 Тепер зберігає в базу!
             updateHomeDisplay(user);
-            renderLeaderboard(user); // Оновлюємо лідерборд, хоч золото і зменшилось
+            renderLeaderboard(user); // І оновлює рейтинг
             alert(`Придбано: ${realItem.name}!`);
         } else {
             alert("Недостатньо золота!");
