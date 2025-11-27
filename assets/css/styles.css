@@ -162,27 +162,46 @@ label {
 
 /* Інфо про учня в сайдбарі */
 .sidebar-profile-info {
-    background: rgba(255, 255, 255, 0.1);
-    padding: 20px;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1); 
+    padding: 25px 20px;       /* Трохи більше простору */
+    border-radius: 15px;
+    margin-bottom: 30px;
     text-align: center;
-    margin-bottom: 20px;
     border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2); /* Гарна тінь під карткою */
 }
 
+/* Ім'я учня */
+.sidebar-profile-info h4 {
+    margin: 0 0 12px 0;
+    color: white;
+    font-size: 1.8rem;        /* 🔥 БУЛО 1.1em -> СТАЛО 1.8rem (Велике) */
+    font-weight: 800;         /* Дуже жирний шрифт */
+    letter-spacing: 1px;      /* Відступ між літерами */
+    line-height: 1.2;
+}
+
+/* Бейдж класу */
 .class-badge {
     display: inline-block;
-    background: #6c5ce7;
+    background: #1dd2af;
     color: white;
-    padding: 3px 10px;
-    border-radius: 10px;
-    font-size: 0.85em;
+    padding: 6px 16px;        /* Більша кнопка */
+    border-radius: 20px;      /* Більше заокруглення */
+    font-size: 1.1rem;        /* 🔥 БУЛО 0.8em -> СТАЛО 1.1rem */
+    font-weight: bold;
 }
 
+/* Баланс монет */
 .coin-balance-sidebar {
-    font-size: 1.4em;
-    color: #ffd700;
-    font-weight: bold;
+    margin-top: 20px;
+    font-size: 2.4rem;        /* 🔥 БУЛО 1.4em -> СТАЛО 2.4rem (Величезне) */
+    color: #ffd700;           /* Золотий */
+    font-weight: 900;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5); /* Тінь, щоб цифри "вистрибували" */
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
 }
 
 /* Меню навігації */
@@ -253,12 +272,17 @@ label {
     align-items: center;
 }
 
-/* Заголовки на правій панелі */
+/* Заголовки всередині панелі (Скарбниця, Лідерборд...) */
 .main-panel h2 {
     color: var(--accent-gold);
-    text-shadow: 1px 1px 0 #000;
+    text-shadow: 3px 3px 0 #000;      /* Глибока чорна тінь */
     text-align: center;
-    font-size: 2rem;
+    font-size: 3rem;                /* 🔥 ЗНАЧНО БІЛЬШИЙ ШРИФТ */
+    margin-bottom: 30px;
+    margin-top: 10px;
+    text-transform: uppercase;        /* Великі літери */
+    letter-spacing: 2px;              /* Відступ між літерами */
+    font-weight: 900;                 /* Дуже жирний */
 }
 
 /* =========================================
@@ -344,23 +368,39 @@ label {
 /* Товар в магазині */
 .shop-item { margin-bottom: 25px; display: flex; flex-direction: column; gap: 5px; }
 .shop-item-row { display: flex; justify-content: space-between; align-items: flex-start; }
-.item-name { font-size: 1rem; font-weight: bold; color: white; width: 60%; }
-.item-price { color: var(--accent-gold); font-weight: bold; text-align: right; width: 35%; }
-.item-desc { font-size: 0.8rem; color: #aaa; margin-bottom: 8px; }
+.item-name { font-size: 1.5rem; font-weight: bold; color: white; width: 60%; }
+.item-price { color: var(--accent-gold); font-weight: bold; text-align: right; width: 50%; }
+.item-desc { font-size: 1.2rem; color: #aaa; margin-bottom: 8px; }
 
+/* Кнопка купити (в стилі меню навігації) */
 .btn-buy {
-    background-color: transparent;
-    border: 1px solid var(--accent-gold);
-    color: var(--accent-gold);
-    padding: 5px 10px;
-    border-radius: 5px;
+    background-color: var(--accent-teal); /* Бірюзовий фон */
+    color: white;                         /* Білий текст */
+    border: none;
+    border-radius: 15px;                  /* Сильне закруглення */
+    padding: 12px 20px;
+    font-size: 1rem;
+    font-weight: bold;
     cursor: pointer;
-    font-size: 0.8rem;
-    transition: all 0.3s;
+    box-shadow: 0 4px 0 #117a65;          /* Темна тінь знизу (3D ефект) */
+    transition: all 0.2s ease;
     width: 100%;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-top: 10px;
 }
-.btn-buy:hover { background-color: var(--accent-gold); color: black; }
+
+.btn-buy:hover {
+    background-color: #1dd2af;            /* Світлішає при наведенні */
+    transform: translateY(-3px);          /* Підскакує вгору */
+    box-shadow: 0 6px 0 #117a65;          /* Тінь росте */
+    color: white;
+}
+
+.btn-buy:active {
+    transform: translateY(2px);           /* Вдавлюється при кліку */
+    box-shadow: 0 0 0 #117a65;            /* Тінь зникає */
+}
 
 /* =========================================
    9. ІНВЕНТАР
@@ -400,4 +440,125 @@ label {
     0% { transform: scale(1); }
     50% { transform: scale(1.1); }
     100% { transform: scale(1); }
+}
+
+/* =========================================
+   11. НОВИЙ ІНВЕНТАР (ГРУПОВАНИЙ)
+   ========================================= */
+
+/* Заголовки категорій в списку (Дрібниці, Середні...) */
+.inventory-category-header {
+    width: 100%;
+    color: var(--accent-gold); /* Золотий колір */
+    font-size: 2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 15px; /* Відступ зверху */
+    margin-bottom: 8px;
+    padding-bottom: 5px;
+    text-align: left;
+    list-style: none; /* Прибираємо крапку */
+    display: block; /* Займає весь рядок */
+}
+
+/* Бейдж кількості (x4) */
+.item-count {
+    background-color: var(--accent-teal); /* Зелений/Бірюзовий фон */
+    color: white;
+    font-size: 0.75em;
+    padding: 2px 8px;
+    border-radius: 12px;
+    margin-left: 8px;
+    font-weight: bold;
+    vertical-align: middle;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* Покращення для списку, щоб він не розвалювався */
+.inventory-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start; /* Вирівнювання зліва */
+    align-content: flex-start;
+    gap: 10px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* =========================================
+   12. СТИЛІ ІНВЕНТАРЯ (КОЛОНКИ ТА КАРТКИ)
+   ========================================= */
+
+/* Контейнер карток всередині колонки */
+.inventory-column-content {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+/* Сама картка купленого предмета */
+.inventory-card-item {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 12px;
+    transition: transform 0.2s, background-color 0.2s;
+    text-align: left;
+}
+
+.inventory-card-item:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    transform: translateX(5px); /* Легкий зсув вправо при наведенні */
+}
+
+/* Назва предмета */
+.inv-name {
+    font-weight: bold;
+    color: var(--accent-gold);
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+    /* 👇 Вирівнювання назви і бейджика в одну лінію */
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+}
+
+/* Бейдж кількості (x2, x3) */
+.item-count {
+    background-color: var(--accent-teal);
+    color: white;
+    font-size: 1em;
+    
+    /* 👇 МАГІЯ ЦЕНТРУВАННЯ 👇 */
+    display: inline-flex;       /* Робить бейдж гнучким контейнером */
+    align-items: center;        /* Центрує текст по вертикалі */
+    justify-content: center;    /* Центрує текст по горизонталі */
+    height: 28px;               /* Фіксована висота, щоб був рівний */
+    padding: 0 12px;            /* Відступи збоку */
+    border-radius: 14px;        /* Ідеально круглі краї */
+    
+    font-weight: bold;
+    line-height: 0;             /* Прибираємо вплив шрифтових відступів */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    margin-left: 10px;
+}
+
+/* Опис предмета */
+.inv-desc {
+    font-size: 1.2em;
+    color: #ccc;
+    font-style: italic;
+    line-height: 1.2;
+}
+
+/* Стиль для пустої категорії в інвентарі */
+.inv-empty-category {
+    color: rgba(255, 255, 255, 0.3);
+    font-style: italic;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 0.9em;
 }

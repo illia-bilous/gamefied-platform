@@ -16,12 +16,10 @@ function saveUserData(user) {
 let isListenerAdded = false;
 
 export function initStudentPanel() {
-    console.log("StudentPanel: Init...");
+    console.log("StudentPanel: Init (Always Visible Columns)...");
     
     let user = getCurrentUser();
     if (!user) return;
-
-    // ✂️ ТУТ Я ВИДАЛИВ ЗАЙВИЙ КОД НАВІГАЦІЇ (Він вже є в router.js)
 
     // --- Логіка бонусу ---
     if (!user.profile.welcomeBonusReceived) {
@@ -36,7 +34,6 @@ export function initStudentPanel() {
 
     // --- Завантаження магазину ---
     const shopItems = getShopItems();
-    // Малюємо полиці магазину
     renderShopSection("rewards-micro-list", shopItems.micro);
     renderShopSection("rewards-medium-list", shopItems.medium);
     renderShopSection("rewards-large-list", shopItems.large);
@@ -114,17 +111,17 @@ export function initStudentPanel() {
         updateHomeDisplay(user);
     };
 
-    // --- Допоміжні функції ---
+    // ==========================================
+    // 🎒 ОНОВЛЕНА ЛОГІКА ІНВЕНТАРЯ (ВСІ КОЛОНКИ ЗАВЖДИ)
+    // ==========================================
 
     function updateHomeDisplay(currentUser) {
         if (!currentUser) return;
         
-        const nameEl = document.getElementById("student-name-display");
-        const classEl = document.getElementById("student-class-display");
+        document.getElementById("student-name-display").textContent = currentUser.name;
+        document.getElementById("student-class-display").textContent = currentUser.className || "--";
         const goldEl = document.getElementById("student-gold-display");
-
-        if (nameEl) nameEl.textContent = currentUser.name;
-        if (classEl) classEl.textContent = currentUser.className || "--";
+        
         if (goldEl) {
             goldEl.textContent = currentUser.profile.gold;
             goldEl.classList.remove("pulse");
@@ -135,31 +132,73 @@ export function initStudentPanel() {
         const listEl = document.getElementById("student-inventory-list");
         if (listEl) {
             listEl.innerHTML = "";
-            if (!currentUser.profile.inventory || currentUser.profile.inventory.length === 0) {
-                listEl.innerHTML = '<li class="empty-msg">Поки що пусто...</li>';
-            } else {
-                currentUser.profile.inventory.forEach(item => {
-                    const li = document.createElement("li");
-                    li.className = "inventory-item";
-                    li.innerHTML = `<span>📜</span> ${item.name}`;
-                    listEl.appendChild(li);
-                });
-            }
+            const userInv = currentUser.profile.inventory || [];
+
+            // Налаштовуємо сітку (grid), щоб виглядало як в магазині
+            listEl.className = "treasury-grid"; 
+            listEl.style.padding = "0";
+            listEl.style.marginTop = "20px";
+            listEl.style.display = "flex"; // Примусово вмикаємо Flex
+
+            const shopDB = getShopItems();
+
+            // Функція створення колонки (Тепер створює ЗАВЖДИ, навіть якщо пуста)
+            const createColumn = (title, dbItems) => {
+                // Шукаємо, що є в юзера з цієї категорії
+                const itemsInCat = dbItems.filter(shopItem => 
+                    userInv.some(uItem => uItem.name === shopItem.name)
+                );
+
+                let contentHtml = "";
+
+                if (itemsInCat.length === 0) {
+                    // 👇 Якщо нічого немає в цій категорії - пишемо "Пусто"
+                    contentHtml = `<div class="inv-empty-category">Ще не куплено...</div>`;
+                } else {
+                    // Якщо є - малюємо картки
+                    itemsInCat.forEach(shopItem => {
+                        const count = userInv.filter(uItem => uItem.name === shopItem.name).length;
+                        const badge = count > 1 ? `<span class="item-count">x${count}</span>` : "";
+                        
+                        contentHtml += `
+                            <div class="inventory-card-item">
+                                <div class="inv-name">${shopItem.name} ${badge}</div>
+                                <div class="inv-desc">${shopItem.desc}</div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Повертаємо HTML колонки
+                return `
+                    <div class="reward-column">
+                        <div class="reward-header">${title}</div>
+                        <div class="dashed-line"></div>
+                        <div class="inventory-column-content">
+                            ${contentHtml}
+                        </div>
+                    </div>
+                `;
+            };
+
+            // Генеруємо HTML для всіх 3 колонок
+            let finalHtml = "";
+            finalHtml += createColumn("Мої Мікро-нагороди", shopDB.micro);
+            finalHtml += createColumn("Мої Середні нагороди", shopDB.medium);
+            finalHtml += createColumn("Мої Великі нагороди", shopDB.large);
+
+            listEl.innerHTML = finalHtml;
         }
     }
 
     function renderShopSection(containerId, items) {
         const container = document.getElementById(containerId);
-        if (!container) return; // Якщо блоку немає - виходимо мовчки
-        
+        if (!container) return;
         container.innerHTML = "";
-
-        // Перевірка на пустоту
         if (!items || items.length === 0) {
-            container.innerHTML = "<div style='color:#aaa; font-style:italic;'>Тут поки пусто...</div>";
+            container.innerHTML = "<div style='color:#aaa; font-style:italic;'>Пусто...</div>";
             return;
         }
-
         items.forEach(item => {
             const itemDiv = document.createElement("div");
             itemDiv.className = "shop-item";
@@ -186,7 +225,13 @@ export function initStudentPanel() {
         if (user.profile.gold >= realItem.price) {
             user.profile.gold -= realItem.price;
             if (!user.profile.inventory) user.profile.inventory = [];
-            user.profile.inventory.push({ name: realItem.name, date: new Date().toISOString() });
+            
+            user.profile.inventory.push({ 
+                id: realItem.id, 
+                name: realItem.name, 
+                date: new Date().toISOString() 
+            });
+            
             saveUserData(user);
             updateHomeDisplay(user);
             alert(`Придбано: ${realItem.name}!`);
