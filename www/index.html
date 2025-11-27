@@ -209,7 +209,7 @@
                 <button class="menu-item" data-panel="tasks">
                     📝 Редактор Завдань
                 </button>
-                <button class="menu-item" data-panel="treasury-editor">
+                <button id="nav-redaktor-skarbnitsi" class="menu-item" data-panel="treasury-editor">
                     💎 Редактор Скарбниці
                 </button>
                 <button class="menu-item" data-panel="analytics">
@@ -255,31 +255,8 @@
             </div>
 
              <div id="view-treasury-editor" class="panel-view hidden">
-                 <h2 style="text-align:center; margin-bottom:20px; color: var(--accent-gold);">💎 Редагування цін Скарбниці</h2>
-                 <p style="text-align:center; margin-bottom:30px;">Тут ви можете змінювати ціни на нагороди для учнів.</p>
-                 
-                 <div class="treasury-grid">
-                    
-                    <div class="reward-column">
-                        <div class="reward-header">Мікро-нагороди</div>
-                        <div class="dashed-line"></div>
-                        <div id="teacher-rewards-micro"></div> 
-                    </div>
-
-                    <div class="reward-column">
-                        <div class="reward-header">Середні нагороди</div>
-                        <div class="dashed-line"></div>
-                        <div id="teacher-rewards-medium"></div>
-                    </div>
-
-                    <div class="reward-column">
-                        <div class="reward-header">Великі нагороди</div>
-                        <div class="dashed-line"></div>
-                        <div id="teacher-rewards-large"></div>
-                    </div>
-
-                </div>
-             </div>
+                <div id="treasury-content"></div>
+            </div>
 
              <div id="view-analytics" class="panel-view hidden">
                  <h2>Аналітика прогресу</h2>
