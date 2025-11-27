@@ -1,6 +1,7 @@
 import { getCurrentUser } from "./auth.js";
 import { getShopItems, findItemById } from "./shopData.js";
 
+// --- ФУНКЦІЯ ЗБЕРЕЖЕННЯ ---
 function saveUserData(user) {
     localStorage.setItem("currentUser", JSON.stringify(user));
     const allUsers = JSON.parse(localStorage.getItem("users") || "[]");
@@ -16,14 +17,16 @@ function getAllUsersFromDB() {
     return JSON.parse(localStorage.getItem("users") || "[]");
 }
 
+// 👇 Змінна для захисту від дублювання слухача Unity
 let isListenerAdded = false;
 
 export function initStudentPanel() {
-    console.log("StudentPanel: Init (Leaderboard included)...");
+    console.log("StudentPanel: Init (Full Version + x1 Badge)...");
     
     let user = getCurrentUser();
     if (!user) return;
 
+    // --- Логіка бонусу ---
     if (!user.profile.welcomeBonusReceived) {
         user.profile.gold = 2500;
         user.profile.welcomeBonusReceived = true;
@@ -31,17 +34,22 @@ export function initStudentPanel() {
         saveUserData(user);
     }
 
+    // --- Оновлення даних ---
     updateHomeDisplay(user);
     
     // 👇 ЗАПУСКАЄМО ГЕНЕРАЦІЮ ЛІДЕРБОРДУ
     renderLeaderboard(user);
 
+    // --- Завантаження магазину ---
     const shopItems = getShopItems();
     renderShopSection("rewards-micro-list", shopItems.micro);
     renderShopSection("rewards-medium-list", shopItems.medium);
     renderShopSection("rewards-large-list", shopItems.large);
 
-    // --- UNITY LOGIC ---
+    // ==========================================
+    // 🎮 ЛОГІКА UNITY
+    // ==========================================
+
     const unityContainer = document.getElementById("unity-container");
     const startBtn = document.getElementById("btn-start-lesson");
 
@@ -51,20 +59,22 @@ export function initStudentPanel() {
             
             if (event.data.startsWith("ADD_COINS|")) {
                 const amount = parseInt(event.data.split("|")[1]);
+                console.log(`Нараховуємо: ${amount} монет`);
                 let currentUser = getCurrentUser(); 
                 if (currentUser) {
                     currentUser.profile.gold += amount;
                     saveUserData(currentUser);
                     updateHomeDisplay(currentUser);
-                    // Оновлюємо лідерборд, бо золото змінилось
-                    renderLeaderboard(currentUser); 
+                    renderLeaderboard(currentUser); // Оновлюємо рейтинг
                 }
             }
+
             if (event.data === "CLOSE_GAME") {
                 closeUnityGame();
             }
         });
         isListenerAdded = true;
+        console.log("System: Unity Listener Activated (ONCE)");
     }
 
     if (startBtn) {
@@ -72,6 +82,7 @@ export function initStudentPanel() {
             if (unityContainer) {
                 unityContainer.classList.remove("hidden");
                 startBtn.style.display = "none"; 
+
                 if (!document.getElementById("btn-force-close-unity")) {
                     const closeBtn = document.createElement("button");
                     closeBtn.id = "btn-force-close-unity";
@@ -80,6 +91,7 @@ export function initStudentPanel() {
                     closeBtn.onclick = closeUnityGame;
                     unityContainer.parentNode.insertBefore(closeBtn, unityContainer);
                 }
+
                 const iframe = unityContainer.querySelector("iframe");
                 if (!iframe) {
                      const newIframe = document.createElement("iframe");
@@ -101,7 +113,9 @@ export function initStudentPanel() {
         }
         const closeBtn = document.getElementById("btn-force-close-unity");
         if (closeBtn) closeBtn.remove();
+        
         if(startBtn) startBtn.style.display = "inline-block"; 
+        
         user = getCurrentUser();
         updateHomeDisplay(user);
         renderLeaderboard(user);
@@ -114,7 +128,6 @@ export function initStudentPanel() {
         const container = document.getElementById("view-leaderboard");
         if (!container) return;
 
-        // Очищаємо контейнер
         container.innerHTML = `
             <h2 style="text-align:center; margin-bottom:20px;">🏆 Рейтинг класу ${currentUser.className || ""}</h2>
             <div class="leaderboard-wrapper">
@@ -134,16 +147,13 @@ export function initStudentPanel() {
         const tbody = document.getElementById("leaderboard-body");
         const allUsers = getAllUsersFromDB();
 
-        // 1. Фільтруємо: тільки учні, тільки з мого класу
         const classmates = allUsers.filter(u => 
             u.role === "student" && 
             u.className === currentUser.className
         );
 
-        // 2. Сортуємо: у кого більше золота - той вище
         classmates.sort((a, b) => (b.profile.gold || 0) - (a.profile.gold || 0));
 
-        // 3. Малюємо рядки
         if (classmates.length === 0) {
             tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 20px;">Клас пустий...</td></tr>`;
             return;
@@ -152,12 +162,10 @@ export function initStudentPanel() {
         classmates.forEach((student, index) => {
             const tr = document.createElement("tr");
             
-            // Якщо це я - підсвічуємо
             if (student.email === currentUser.email) {
                 tr.className = "my-rank";
             }
 
-            // Медальки для топ-3
             let rankDisplay = index + 1;
             if (index === 0) rankDisplay = "🥇 1";
             if (index === 1) rankDisplay = "🥈 2";
@@ -173,14 +181,16 @@ export function initStudentPanel() {
     }
 
     // ==========================================
-    // ІНВЕНТАР ТА ІНШЕ
+    // 🎒 ЛОГІКА ІНВЕНТАРЯ (3 КОЛОНКИ + x1)
     // ==========================================
 
     function updateHomeDisplay(currentUser) {
         if (!currentUser) return;
+        
         document.getElementById("student-name-display").textContent = currentUser.name;
         document.getElementById("student-class-display").textContent = currentUser.className || "--";
         const goldEl = document.getElementById("student-gold-display");
+        
         if (goldEl) {
             goldEl.textContent = currentUser.profile.gold;
             goldEl.classList.remove("pulse");
@@ -193,7 +203,13 @@ export function initStudentPanel() {
             listEl.innerHTML = "";
             const userInv = currentUser.profile.inventory || [];
 
-            // Робимо контейнер схожим на сітку магазину
+            // Якщо пусто
+            if (userInv.length === 0) {
+                listEl.innerHTML = '<li class="empty-msg" style="width:100%; text-align:center;">Поки що пусто...</li>';
+                listEl.style.display = "block"; 
+                return;
+            }
+
             listEl.className = "treasury-grid"; 
             listEl.style.padding = "0";
             listEl.style.marginTop = "20px";
@@ -207,12 +223,16 @@ export function initStudentPanel() {
                 );
 
                 let contentHtml = "";
+
                 if (itemsInCat.length === 0) {
                     contentHtml = `<div class="inv-empty-category">Ще не куплено...</div>`;
                 } else {
                     itemsInCat.forEach(shopItem => {
                         const count = userInv.filter(uItem => uItem.name === shopItem.name).length;
-                        const badge = count > 1 ? `<span class="item-count">x${count}</span>` : "";
+                        
+                        // 👇 ТУТ ЗМІНА: Завжди показуємо x1, x2...
+                        const badge = `<span class="item-count">x${count}</span>`;
+                        
                         contentHtml += `
                             <div class="inventory-card-item">
                                 <div class="inv-name">${shopItem.name} ${badge}</div>
@@ -221,11 +241,14 @@ export function initStudentPanel() {
                         `;
                     });
                 }
+
                 return `
                     <div class="reward-column">
                         <div class="reward-header">${title}</div>
                         <div class="dashed-line"></div>
-                        <div class="inventory-column-content">${contentHtml}</div>
+                        <div class="inventory-column-content">
+                            ${contentHtml}
+                        </div>
                     </div>
                 `;
             };
@@ -234,6 +257,7 @@ export function initStudentPanel() {
             finalHtml += createColumn("Мої Мікро-нагороди", shopDB.micro);
             finalHtml += createColumn("Мої Середні нагороди", shopDB.medium);
             finalHtml += createColumn("Мої Великі нагороди", shopDB.large);
+
             listEl.innerHTML = finalHtml;
         }
     }
@@ -265,14 +289,23 @@ export function initStudentPanel() {
     function buyItem(visualItem) {
         user = getCurrentUser(); 
         const realItem = findItemById(visualItem.id);
+
         if (!realItem) { alert("Товар не знайдено."); return; }
         if (realItem.price !== visualItem.price) { alert("Ціна змінилася. Сторінка оновлюється."); location.reload(); return; }
+
         if (user.profile.gold >= realItem.price) {
             user.profile.gold -= realItem.price;
             if (!user.profile.inventory) user.profile.inventory = [];
-            user.profile.inventory.push({ id: realItem.id, name: realItem.name, date: new Date().toISOString() });
+            
+            user.profile.inventory.push({ 
+                id: realItem.id, 
+                name: realItem.name, 
+                date: new Date().toISOString() 
+            });
+            
             saveUserData(user);
             updateHomeDisplay(user);
+            renderLeaderboard(user); // Оновлюємо лідерборд, хоч золото і зменшилось
             alert(`Придбано: ${realItem.name}!`);
         } else {
             alert("Недостатньо золота!");
