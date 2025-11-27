@@ -1,124 +1,196 @@
-import { getShopItems, updateItemPrice } from "./shopData.js"; // <--- Імпортуємо логіку магазину
+// src/teacherPanel.js
 
-// Зберігаємо ключ, під яким будуть лежати налаштування гри
-const GAME_CONFIG_KEY = "game_config_data";
+import { db } from "./firebase.js";
+import { 
+    collection, 
+    getDocs, 
+    query, 
+    where, 
+    orderBy, 
+    doc, 
+    updateDoc 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+// --- ФУНКЦІЯ ЗАПУСКУ ---
 export function initTeacherPanel() {
     console.log("TeacherPanel: Init...");
-
-    // 1. Завантажуємо налаштування гри (Unity)
-    loadGameSettings();
-
-    // 2. Обробка кнопки "Зберегти" для гри
-    const saveBtn = document.getElementById("btn-save-game-settings");
-    if (saveBtn) {
-        saveBtn.onclick = saveGameSettings;
-    }
-
-    // 3. 👇 ЗАВАНТАЖУЄМО РЕДАКТОР СКАРБНИЦІ (НОВЕ)
-    renderTreasuryEditor();
+    renderTeacherDashboard("teacher-content"); 
 }
 
-// =================================================
-// 🛍️ ЛОГІКА РЕДАКТОРА СКАРБНИЦІ
-// =================================================
+// --- ЛОГІКА ОТРИМАННЯ УНІКАЛЬНИХ КЛАСІВ З БАЗИ ---
+async function getUniqueClasses() {
+    const usersSnapshot = await getDocs(collection(db, "users"));
+    
+    const classes = new Set(); 
+    let studentCount = 0;
 
-function renderTreasuryEditor() {
-    console.log("Rendering Treasury Editor...");
-    const items = getShopItems(); // Беремо товари з твого shopData.js
-
-    // Рендеримо 3 категорії у відповідні блоки в HTML
-    renderCategory("teacher-rewards-micro", items.micro);
-    renderCategory("teacher-rewards-medium", items.medium);
-    renderCategory("teacher-rewards-large", items.large);
+    usersSnapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.role === "student" && data.className) {
+            classes.add(data.className);
+            studentCount++;
+        }
+    });
+    
+    return { classes: Array.from(classes), totalStudents: studentCount }; 
 }
 
-function renderCategory(containerId, itemList) {
+// --- РЕНДЕРИНГ ГОЛОВНОЇ ПАНЕЛІ (БЛОКИ КЛАСІВ) ---
+export async function renderTeacherDashboard(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
+
+    // 1. Отримати унікальні класи
+    const { classes, totalStudents } = await getUniqueClasses();
+
+    container.innerHTML = `
+        <div class="teacher-header">
+            <h2>📚 Мої класи</h2>
+            <p>Всього учнів у системі: ${totalStudents}</p>
+        </div>
+        <div id="class-cards" class="class-grid"></div>
+    `;
     
-    container.innerHTML = ""; // Очищаємо перед малюванням
-
-    itemList.forEach(item => {
-        // Створюємо картку редагування товару
-        const div = document.createElement("div");
-        div.className = "shop-item";
-        div.style.background = "#222"; // Темніший фон для редактора
-        div.style.border = "1px solid #444";
-
-        div.innerHTML = `
-            <div class="shop-item-row">
-                <div class="item-name" style="color: #eee;">${item.name}</div>
-                <div style="width: 45%; text-align: right;">
-                    <input type="number" id="price-${item.id}" value="${item.price}" 
-                           style="width: 70px; padding: 5px; background: #333; color: gold; border: 1px solid #555; border-radius: 5px; text-align: center;">
-                    💰
-                </div>
-            </div>
-            <div class="item-desc" style="margin-bottom: 10px; font-size: 0.8rem; color: #aaa;">${item.desc}</div>
-            <button class="btn-save-price" data-id="${item.id}" 
-                    style="width: 100%; padding: 8px; background: #2ecc71; border: none; border-radius: 5px; cursor: pointer; color: white; font-weight: bold; text-transform: uppercase;">
-                💾 Зберегти ціну
-            </button>
+    const grid = document.getElementById("class-cards");
+    
+    // 2. Створити картку для кожного класу
+    classes.forEach(className => {
+        const card = document.createElement("div");
+        card.className = "class-card";
+        
+        card.innerHTML = `
+            <h3>${className}</h3>
+            <p>Переглянути лідерборд та прогрес</p>
         `;
+        
+        card.addEventListener('click', () => {
+            // ОНОВЛЕННЯ: Викликаємо функцію детального лідерборда
+            renderClassLeaderboard(className); 
+        });
+        
+        grid.appendChild(card);
+    });
 
-        // Додаємо логіку на кнопку "Зберегти"
-        const btn = div.querySelector(".btn-save-price");
-        btn.onclick = () => {
-            const input = document.getElementById(`price-${item.id}`);
-            const newPrice = input.value;
+    if (classes.length === 0) {
+        grid.innerHTML = '<p style="text-align: center; margin-top: 30px;">У системі ще немає зареєстрованих учнів.</p>';
+    }
+}
+
+// =========================================================
+// 🏆 ЛОГІКА РЕНДЕРИНГУ ЛІДЕРБОРДА ДЛЯ КОНКРЕТНОГО КЛАСУ
+// =========================================================
+
+async function renderClassLeaderboard(className) {
+    const container = document.getElementById("teacher-content");
+    if (!container) return;
+
+    // Створюємо базовий інтерфейс для таблиці
+    container.innerHTML = `
+        <div class="teacher-header">
+            <button id="btn-back-to-classes" class="btn btn-secondary">← Назад до класів</button>
+            <h2>🏆 Лідерборд класу: ${className}</h2>
+            <p>Учні відсортовані за кількістю золота.</p>
+        </div>
+        <table class="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Ім'я</th>
+                    <th>Золото 💰</th>
+                    <th>Дії</th>
+                </tr>
+            </thead>
+            <tbody id="class-leaderboard-body">
+                </tbody>
+        </table>
+    `;
+
+    // 1. Обробка кнопки "Назад"
+    document.getElementById("btn-back-to-classes").onclick = () => {
+        renderTeacherDashboard("teacher-content"); 
+    };
+
+    const tbody = document.getElementById("class-leaderboard-body");
+    
+    // 2. Запит до Firebase: фільтруємо по className та сортуємо по gold
+    const q = query(
+        collection(db, "users"),
+        where("role", "==", "student"),
+        where("className", "==", className),
+        orderBy("profile.gold", "desc")
+    );
+    
+    const querySnapshot = await getDocs(q);
+    const students = [];
+    querySnapshot.forEach(doc => students.push(doc.data()));
+
+    // 3. Рендеринг рядків таблиці
+    students.forEach((student, index) => {
+        const tr = document.createElement("tr");
+        
+        let rankDisplay = index + 1;
+        if (index === 0) rankDisplay = "🥇 1";
+        if (index === 1) rankDisplay = "🥈 2";
+        if (index === 2) rankDisplay = "🥉 3";
+
+        tr.innerHTML = `
+            <td class="rank-col">${rankDisplay}</td>
+            <td class="name-col">${student.name}</td>
+            <td class="gold-col">${student.profile.gold || 0} 💰</td>
+            <td class="action-col">
+                <button class="btn btn-sm btn-edit-gold" data-uid="${student.uid}">Редагувати</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+    
+    // 4. Підключаємо логіку редагування
+    setupGoldEditor(students);
+}
+
+// =========================================================
+// ✏️ ЛОГІКА РЕДАГУВАННЯ ЗОЛОТА ВЧИТЕЛЕМ
+// =========================================================
+
+function setupGoldEditor(students) {
+    document.querySelectorAll('.btn-edit-gold').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const studentUid = e.target.dataset.uid;
+            const student = students.find(s => s.uid === studentUid);
             
-            // Викликаємо функцію оновлення з shopData.js
-            const success = updateItemPrice(item.id, newPrice);
+            if (!student) return alert("Помилка: Учня не знайдено!");
+
+            const currentGold = student.profile.gold || 0;
+            const newGoldStr = prompt(`Введіть нову суму золота для ${student.name} (поточна: ${currentGold} 💰):`);
             
-            if (success) {
-                alert(`Ціну на "${item.name}" оновлено до ${newPrice}!`);
-                input.style.borderColor = "#2ecc71"; // Зелена рамка як підтвердження
-            } else {
-                alert("Помилка збереження!");
+            if (newGoldStr === null) return; 
+            
+            const newGold = parseInt(newGoldStr);
+            
+            if (isNaN(newGold) || newGold < 0) {
+                return alert("Будь ласка, введіть дійсне додатне число.");
             }
-        };
-
-        container.appendChild(div);
+            
+            updateStudentGold(studentUid, newGold, student.className, student.name);
+        });
     });
 }
 
-// =================================================
-// 🎮 ЛОГІКА НАЛАШТУВАНЬ ГРИ (UNITY)
-// =================================================
+async function updateStudentGold(uid, newGold, className, studentName) {
+    try {
+        const userRef = doc(db, "users", uid);
+        
+        await updateDoc(userRef, {
+            "profile.gold": newGold
+        });
 
-function loadGameSettings() {
-    // Дістаємо з пам'яті або беремо стандартні
-    const rawData = localStorage.getItem(GAME_CONFIG_KEY);
-    const config = rawData ? JSON.parse(rawData) : { reward: 10, btnText: "+10 Coins" };
+        alert(`✅ Золото ${studentName} оновлено до ${newGold}!`);
+        
+        // Перезавантажуємо лідерборд, щоб показати оновлені дані
+        renderClassLeaderboard(className); 
 
-    // Заповнюємо інпути
-    const inputReward = document.getElementById("setting-reward-amount");
-    const inputText = document.getElementById("setting-button-text");
-
-    if (inputReward) inputReward.value = config.reward;
-    if (inputText) inputText.value = config.btnText;
-}
-
-function saveGameSettings() {
-    const inputReward = document.getElementById("setting-reward-amount");
-    const inputText = document.getElementById("setting-button-text");
-    const statusMsg = document.getElementById("settings-status");
-
-    // Зчитуємо дані
-    const newConfig = {
-        reward: parseInt(inputReward.value) || 10,
-        btnText: inputText.value || "+10 Coins"
-    };
-
-    // Зберігаємо в LocalStorage
-    localStorage.setItem(GAME_CONFIG_KEY, JSON.stringify(newConfig));
-
-    console.log("Teacher: Game settings saved:", newConfig);
-
-    // Показуємо повідомлення "Збережено"
-    if (statusMsg) {
-        statusMsg.style.display = "block";
-        setTimeout(() => statusMsg.style.display = "none", 3000);
+    } catch (error) {
+        console.error("Помилка оновлення золота:", error);
+        alert("❌ Помилка: Не вдалося оновити золото в базі даних.");
     }
 }

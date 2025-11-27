@@ -622,3 +622,52 @@ label {
     font-weight: bold;
     text-align: center;
 }
+
+/* --- СТИЛІ ПАНЕЛІ ВЧИТЕЛЯ (КЛАСИ) --- */
+
+.teacher-header {
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.class-grid {
+    display: grid;
+    /* Створює адаптивну сітку: 
+       мінімальна ширина картки 250px, займає стільки місця, скільки влізе */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+    gap: 20px;
+}
+
+.class-card {
+    background-color: #f7f7f7;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.class-card:hover {
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    background-color: #ffe0b2; /* Легкий помаранчевий при наведенні */
+}
+
+.class-card h3 {
+    margin-top: 0;
+    color: #333;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #ff9800; /* Колір Moodle */
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+}
+
+.class-card p {
+    color: #666;
+    font-size: 0.9rem;
+}

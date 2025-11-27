@@ -3,6 +3,7 @@ import { initAuth, getCurrentUser } from "./auth.js";
 import { initStudentPanel } from "./studentPanel.js";
 import { initTeacherPanel } from "./teacherPanel.js"; // <--- ВАЖЛИВО
 
+
 let currentRole = null;
 
 // Функція логауту
@@ -55,14 +56,6 @@ function setupDashboardNavigation(screenId) {
 
 function initializeApp() {
     console.log("initializeApp: Start...");
-
-    // Тимчасова очистка
-    setupButtonListener("btn-debug-clear-users", () => {
-        if (confirm("Видалити ВСІХ користувачів?")) {
-            localStorage.clear();
-            location.reload();
-        }
-    });
 
     // Навігація входу
     setupButtonListener("btn-role-student", () => { currentRole = "student"; showScreen("screen-auth-choice"); });
