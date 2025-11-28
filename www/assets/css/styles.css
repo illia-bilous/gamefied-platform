@@ -713,3 +713,33 @@ label {
     font-style: normal; /* Прибираємо курсив */
     font-weight: bold; /* Робимо жирним */
 }
+
+/* --- СТИЛІ ДЛЯ ПОМИЛОК ВВОДУ --- */
+
+/* Стан поля з помилкою */
+.input-error {
+    border: 2px solid #e74c3c !important; /* Червона рамка */
+    background-color: #fadbd8 !important; /* Рожевий фон */
+    color: #c0392b !important;            /* Темно-червоний текст */
+    animation: shake 0.3s ease-in-out;    /* Анімація тремтіння */
+}
+
+/* Текст помилки під полем */
+.error-msg {
+    color: #e74c3c;
+    font-size: 0.85em;
+    margin-top: -12px; /* Підтягуємо ближче до поля */
+    margin-bottom: 15px;
+    text-align: left;
+    font-weight: bold;
+    display: block;
+}
+
+/* Анімація "Тремтіння" для привернення уваги */
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}

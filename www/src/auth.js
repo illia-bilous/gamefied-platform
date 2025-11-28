@@ -11,7 +11,7 @@ import {
     getDoc 
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const TEACHER_KEY = "1";
+const TEACHER_KEY = "1"; // Код доступу для вчителя
 
 // --- ОТРИМАННЯ ПОТОЧНОГО КОРИСТУВАЧА ---
 export function getCurrentUser() {
@@ -31,23 +31,37 @@ export function logoutUser() {
     }).catch((error) => console.error(error));
 }
 
-// --- UI HELPERS ---
+// --- UI HELPERS (ВІЗУАЛІЗАЦІЯ ПОМИЛОК) ---
+
+// Функція встановлення помилки на конкретне поле
 function setError(inputEl, message) {
     if (!inputEl) return;
+    
+    // 1. Додаємо клас стилю (червона рамка, рожевий фон)
     inputEl.classList.add("input-error");
+    
+    // 2. Створюємо або оновлюємо текст помилки під полем
     let err = inputEl.nextElementSibling;
+    
+    // Якщо наступний елемент не є повідомленням про помилку, створюємо його
     if (!err || !err.classList.contains("error-msg")) {
         err = document.createElement("div");
         err.className = "error-msg";
         inputEl.insertAdjacentElement("afterend", err);
     }
+    
     err.textContent = message;
 }
 
+// Функція очищення всіх помилок у формі
 function clearAllErrors(formId) {
     const form = document.getElementById(formId);
     if (!form) return;
+    
+    // Прибираємо червоні рамки
     form.querySelectorAll(".input-error").forEach(el => el.classList.remove("input-error"));
+    
+    // Видаляємо тексти помилок
     form.querySelectorAll(".error-msg").forEach(el => el.remove());
 }
 
@@ -77,22 +91,43 @@ export function initAuth(onLoginSuccess) {
             const isTeacherView = !document.getElementById("register-teacher-key")?.classList.contains("hidden");
             const role = isTeacherView ? "teacher" : "student";
             let className = null;
+            let hasError = false;
 
-            if (name.length < 2) return setError(nameEl, "Введіть повне ім'я");
-            if (pass.length < 6) return setError(passEl, "Пароль має бути від 6 символів");
+            // Валідація полів
+            if (name.length < 2) {
+                setError(nameEl, "Введіть повне ім'я (мінімум 2 літери)");
+                hasError = true;
+            }
+
+            if (pass.length < 6) {
+                setError(passEl, "Пароль має бути не менше 6 символів");
+                hasError = true;
+            }
+
+            if (!email.includes("@")) {
+                setError(emailEl, "Введіть коректний email");
+                hasError = true;
+            }
 
             if (role === "teacher") {
-                if (teacherKeyEl.value.trim() !== TEACHER_KEY) return setError(teacherKeyEl, "Невірний код вчителя!");
+                if (teacherKeyEl.value.trim() !== TEACHER_KEY) {
+                    setError(teacherKeyEl, "Неправильний код доступу!");
+                    hasError = true;
+                }
             } else {
                 className = classEl.value;
-                if (!className) return setError(classEl, "Оберіть клас");
+                if (!className) {
+                    setError(classEl, "Будь ласка, оберіть клас");
+                    hasError = true;
+                }
             }
+
+            if (hasError) return; // Якщо є помилки, зупиняємось
 
             try {
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
 
-                // 👇 ТУТ ЗМІНИ: Одразу даємо 2500 золота в базу
                 const newUserData = {
                     uid: user.uid,
                     name: name,
@@ -100,9 +135,9 @@ export function initAuth(onLoginSuccess) {
                     role: role,
                     className: className, 
                     profile: {
-                        gold: 2500, // <--- БУЛО 0, СТАЛО 2500
+                        gold: 2500,
                         inventory: [],
-                        welcomeBonusReceived: true // <--- Вже отримав
+                        welcomeBonusReceived: true
                     },
                     createdAt: new Date().toISOString()
                 };
@@ -116,7 +151,9 @@ export function initAuth(onLoginSuccess) {
             } catch (error) {
                 console.error("Помилка реєстрації:", error);
                 if (error.code === 'auth/email-already-in-use') {
-                    setError(emailEl, "Цей email вже використовується.");
+                    setError(emailEl, "Цей email вже зареєстрований.");
+                } else if (error.code === 'auth/invalid-email') {
+                    setError(emailEl, "Некоректний формат email.");
                 } else {
                     setError(emailEl, "Помилка: " + error.message);
                 }
@@ -136,8 +173,18 @@ export function initAuth(onLoginSuccess) {
             const passEl = document.getElementById("login-pass");
             const email = emailEl.value.trim();
             const pass = passEl.value.trim();
+            let hasError = false;
 
-            if (!email || !pass) return setError(emailEl, "Заповніть всі поля");
+            if (!email) {
+                setError(emailEl, "Введіть email");
+                hasError = true;
+            }
+            if (!pass) {
+                setError(passEl, "Введіть пароль");
+                hasError = true;
+            }
+
+            if (hasError) return;
 
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, pass);
@@ -148,15 +195,31 @@ export function initAuth(onLoginSuccess) {
                     const userData = userDoc.data();
                     localStorage.setItem("currentUser", JSON.stringify(userData));
                     console.log("✅ Вхід виконано:", userData.name);
+                    
+                    // Очистка полів
                     emailEl.value = "";
                     passEl.value = "";
+                    
                     onLoginSuccess(userData.role);
                 } else {
-                    setError(emailEl, "Помилка: Профіль не знайдено в базі.");
+                    setError(emailEl, "Профіль не знайдено в базі даних.");
                 }
             } catch (error) {
-                console.error("Помилка входу:", error);
-                setError(emailEl, "Невірний логін або пароль");
+                console.error("Помилка входу:", error.code);
+                
+                // Обробка конкретних помилок Firebase
+                if (error.code === 'auth/invalid-email' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+                    // Часто Firebase повертає invalid-credential для безпеки,
+                    // але ми можемо підсвітити обидва або конкретне
+                    setError(emailEl, "Користувача з таким email не знайдено або дані невірні");
+                    setError(passEl, "Перевірте пароль");
+                } else if (error.code === 'auth/wrong-password') {
+                    setError(passEl, "Неправильний пароль");
+                } else if (error.code === 'auth/too-many-requests') {
+                    setError(passEl, "Забагато спроб. Спробуйте пізніше.");
+                } else {
+                    setError(emailEl, "Помилка входу. Спробуйте ще раз.");
+                }
             }
         });
     }

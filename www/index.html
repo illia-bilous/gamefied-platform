@@ -38,7 +38,7 @@
         <div class="main-content auth-form-container">
             <button id="btn-back-auth1" class="btn back-btn">← Назад</button>
             <h2>Вхід</h2>
-            <form id="login-form">
+            <form id="login-form" autocomplete="off">
                 <label for="login-email">Email:</label>
                 <input type="email" id="login-email" required>
 
@@ -56,7 +56,7 @@
             <h2>Реєстрація</h2>
 
             <div id="register-form-content">
-                <form id="register-form">
+                <form id="register-form" autocomplete="off">
                     <label for="reg-name">Ім'я та Прізвище:</label>
                     <input type="text" id="reg-name" required>
 
@@ -228,30 +228,30 @@
                     </div>
             </div>
              
-             <div id="view-tasks" class="panel-view hidden">
-                <h2 style="text-align:center; color: var(--accent-gold);">⚙️ Налаштування Гри (Unity)</h2>
+            <div id="view-tasks" class="panel-view hidden">
+                <h2 style="text-align:center; color: var(--accent-gold);">🗝️ Наповнення Лабіринту</h2>
+                <p style="text-align:center;">Заповніть приклади для кожних дверей у лабіринті.</p>
                 
-                <div class="card-content" style="max-width: 500px; margin: 0 auto; background: #222; color: white;">
-                    <h3 style="margin-bottom: 20px;">Параметри кнопки</h3>
+                <div class="card-content" style="max-width: 900px; margin: 0 auto; background: #222; color: white;">
                     
-                    <form id="game-settings-form">
-                        <label for="setting-reward-amount" style="color: #aaa;">💰 Нагорода за клік (монет):</label>
-                        <input type="number" id="setting-reward-amount" value="10" min="1" max="1000" style="background: #333; color: white; border: 1px solid #555;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px dashed #555; padding-bottom: 15px;">
+                        <div>
+                            <label style="color: var(--accent-gold);">💰 Нагорода за рівень:</label>
+                            <input type="number" id="maze-global-reward" value="100" style="width: 100px; background: #333; color: white; border: 1px solid #555; text-align: center;">
+                        </div>
+                        <div style="font-size: 0.9em; color: #aaa;">
+                            Поточний рівень: <strong>Лабіринт 1 (3 Дверей)</strong>
+                        </div>
+                    </div>
 
-                        <label for="setting-button-text" style="color: #aaa;">🏷 Текст на кнопці:</label>
-                        <input type="text" id="setting-button-text" value="+10 Монет" style="background: #333; color: white; border: 1px solid #555;">
+                    <div id="maze-doors-container" style="display: flex; flex-direction: column; gap: 15px;">
+                        </div>
 
-                        <div class="dashed-line"></div>
-
-                        <button type="button" id="btn-save-game-settings" class="btn primary">💾 ЗБЕРЕГТИ НАЛАШТУВАННЯ</button>
-                    </form>
-                    
-                    <p id="settings-status" style="margin-top: 15px; font-size: 0.9em; color: var(--accent-green); display: none;">✅ Налаштування збережено!</p>
+                    <button id="btn-save-maze-config" class="btn" style="background-color: #27ae60; color: white; margin-top: 30px; font-size: 1.2em;">
+                        💾 ЗБЕРЕГТИ КОНФІГУРАЦІЮ
+                    </button>
+                    <p id="maze-save-status" style="margin-top: 10px; color: var(--accent-green); display: none; text-align: center;">✅ Дані записано! Запустіть гру.</p>
                 </div>
-
-                <p style="text-align: center; margin-top: 20px; color: #777;">
-                    ℹ️ Учні побачать зміни при наступному запуску гри.
-                </p>
             </div>
 
              <div id="view-treasury-editor" class="panel-view hidden">

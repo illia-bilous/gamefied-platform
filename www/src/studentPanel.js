@@ -89,7 +89,7 @@ export function initStudentPanel() {
                 const iframe = unityContainer.querySelector("iframe");
                 if (!iframe) {
                      const newIframe = document.createElement("iframe");
-                     newIframe.src = "unity/index.html"; 
+                     newIframe.src = "unity/index.html?v=" + new Date().getTime(); 
                      newIframe.style.width = "100%";
                      newIframe.style.height = "100%";
                      newIframe.style.border = "none";
